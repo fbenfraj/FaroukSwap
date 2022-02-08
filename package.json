@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "compileContract": "solcjs --bin --abi --include-path node_modules/ --base-path . -o ethereum/contracts/build ethereum/contracts/FaroukSwap.sol",
+    "compileContract": "solcjs --bin --abi --include-path node_modules/ ethereum/contracts/ --base-path . -o ethereum/contracts/build ethereum/contracts/FaroukSwap.sol",
     "deployContract": "node ethereum/deploy.js"
   },
   "repository": {

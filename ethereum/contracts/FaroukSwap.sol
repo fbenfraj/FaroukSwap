@@ -2,53 +2,36 @@
 pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./FaroukCoin.sol";
 
 contract FaroukSwap {
-    IERC20 public token1;
-    address public owner1;
-    uint256 public amount1;
-    IERC20 public token2;
-    address public owner2;
-    uint256 public amount2;
+    IERC20 public contractReserve;
 
-    constructor(
-        // address _token1,
-        // address _owner1,
-        // uint256 _amount1,
-        // address _token2,
-        // address _owner2,
-        // uint256 _amount2
-    ) {
-        // token1 = IERC20(_token1);
-        // owner1 = _owner1;
-        // amount1 = _amount1;
-        // token2 = IERC20(_token2);
-        // owner2 = _owner2;
-        // amount2 = _amount2;
+    event Bought(uint256 amount);
+    event Sold(uint256 amount);
+
+    constructor() {
+        contractReserve = new FaroukCoin();
     }
 
-    function swap() public {
-        require(msg.sender == owner1 || msg.sender == owner2, "Not authorized");
-        require(
-            token1.allowance(owner1, address(this)) >= amount1,
-            "Token 1 allowance too low"
-        );
-        require(
-            token2.allowance(owner2, address(this)) >= amount2,
-            "Token 2 allowance too low"
-        );
-
-        _safeTransferFrom(token1, owner1, owner2, amount1);
-        _safeTransferFrom(token2, owner2, owner1, amount2);
+    function buy() public payable {
+        uint256 amountToBuy = msg.value;
+        uint256 dexBalance = contractReserve.balanceOf(address(this));
+        require(amountToBuy > 0, "You need to send some ether.");
+        require(amountToBuy <= dexBalance, "Not enough tokens in the reserve.");
+        contractReserve.transfer(msg.sender, amountToBuy);
+        emit Bought(amountToBuy);
     }
 
-    function _safeTransferFrom(
-        IERC20 token,
-        address sender,
-        address recipient,
-        uint amount
-    ) private {
-        bool sent = token.transferFrom(sender, recipient, amount);
-        require(sent, "Token transfer failed");
+    function sell(uint256 amount) public {
+        require(amount > 0, "You need to sell at least some tokens.");
+        uint256 allowance = contractReserve.allowance(
+            msg.sender,
+            address(this)
+        );
+        require(allowance >= amount, "Check the token allowance.");
+        contractReserve.transferFrom(msg.sender, address(this), amount);
+        payable(msg.sender).transfer(amount);
+        emit Sold(amount);
     }
 }
