@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Button, Icon, Input, Label } from "semantic-ui-react";
+import fromExponential from "from-exponential";
 import styles from "./SwapCard.module.css";
 
-const SwapCard = () => {
+const SwapCard = ({ conversionRate }) => {
   const tokens = {
     ethereum: {
       name: "ETH",
@@ -25,6 +26,15 @@ const SwapCard = () => {
     setBoughtToken(tmp);
   };
 
+  const updateAmounts = (e) => {
+    const formattedBoughtAmount = fromExponential(
+      e.target.value * conversionRate
+    );
+
+    setSoldAmount(e.target.value);
+    setBoughtAmount(formattedBoughtAmount);
+  };
+
   return (
     <div className={styles.swapContainer}>
       <Label basic image size="large" className={styles.tokenLabel}>
@@ -36,7 +46,7 @@ const SwapCard = () => {
         min="0"
         placeholder="0.0"
         value={soldAmount}
-        onChange={(e) => setSoldAmount(e.target.value)}
+        onChange={updateAmounts}
       />
       <Icon
         circular
@@ -53,9 +63,12 @@ const SwapCard = () => {
         type="number"
         min="0"
         placeholder="0.0"
+        disabled
         value={boughtAmount}
+        className={styles.boughtTokenInput}
         onChange={(e) => setBoughtAmount(e.target.value)}
       />
+      <p>Conversion rate: 1 ETH = {1 * conversionRate} FRKC</p>
       <Button primary className={styles.swapButton}>
         Swap
       </Button>

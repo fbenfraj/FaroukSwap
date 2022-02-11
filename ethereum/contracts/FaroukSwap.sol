@@ -6,6 +6,8 @@ import "./FaroukCoin.sol";
 
 contract FaroukSwap {
     IERC20 public contractReserve;
+    // 1 ETH = 100 FRKC
+    uint256 public conversionRate = 100;
 
     event Bought(uint256 amount);
     event Sold(uint256 amount);

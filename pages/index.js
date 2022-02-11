@@ -1,9 +1,12 @@
+import fs from "fs";
+import path from "path";
+import web3 from "../ethereum/web3";
 import Head from "next/head";
 import Image from "next/image";
 import SwapCard from "../components/SwapCard/SwapCard";
 import styles from "../styles/Home.module.css";
 
-export default function Home() {
+export default function Home({ conversionRate }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -24,7 +27,7 @@ export default function Home() {
             FaroukSwap
           </a>
         </h1>
-        <SwapCard />
+        <SwapCard conversionRate={conversionRate} />
       </main>
 
       <footer className={styles.footer}>
@@ -41,4 +44,27 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+export async function getStaticProps(context) {
+  const abiPath = path.resolve(
+    process.cwd(),
+    "ethereum",
+    "contracts",
+    "build",
+    "ethereum_contracts_FaroukSwap_sol_FaroukSwap.abi"
+  );
+
+  const abi = JSON.parse(fs.readFileSync(abiPath));
+
+  const FaroukSwap = new web3.eth.Contract(
+    abi,
+    "0x671F913Ab9DD24CaA2956bb80901B8f8826D66Ec"
+  );
+
+  const conversionRate = await FaroukSwap.methods.conversionRate().call();
+
+  return {
+    props: { conversionRate },
+  };
 }

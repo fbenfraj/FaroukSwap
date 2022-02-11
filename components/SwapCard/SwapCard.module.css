@@ -9,11 +9,16 @@
   margin: 10px 0 !important;
 }
 
+.boughtTokenInput input {
+  font-weight: bolder;
+  color: black !important;
+}
+
 .switchButton {
   cursor: pointer;
   margin: 10px auto !important;
 }
 
 .swapButton {
-    margin-top: 20px !important;
+  margin-top: 20px !important;
 }
