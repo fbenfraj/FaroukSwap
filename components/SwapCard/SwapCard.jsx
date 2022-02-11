@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Icon, Input, Label } from "semantic-ui-react";
 import fromExponential from "from-exponential";
+import faroukswap from "../../ethereum/faroukswap";
 import styles from "./SwapCard.module.css";
 
-const SwapCard = ({ conversionRate }) => {
+const SwapCard = () => {
   const tokens = {
     ethereum: {
       name: "ETH",
@@ -19,6 +20,11 @@ const SwapCard = ({ conversionRate }) => {
   const [soldAmount, setSoldAmount] = useState("");
   const [boughtToken, setBoughtToken] = useState(tokens["faroukcoin"]);
   const [boughtAmount, setBoughtAmount] = useState("");
+  const [conversionRate, setConversionRate] = useState(null);
+
+  useEffect(async () => {
+    setConversionRate(await faroukswap.methods.conversionRate().call());
+  }, []);
 
   const switchTokens = () => {
     const tmp = soldToken;
