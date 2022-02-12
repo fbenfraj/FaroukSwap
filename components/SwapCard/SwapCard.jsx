@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Icon, Input, Label } from "semantic-ui-react";
+import { Button, Form, Icon, Input, Label } from "semantic-ui-react";
 import fromExponential from "from-exponential";
 import web3 from "../../ethereum/web3";
 import faroukswap from "../../ethereum/faroukswap";
@@ -23,6 +23,7 @@ const SwapCard = () => {
   const [boughtAmount, setBoughtAmount] = useState("");
   const [accounts, setAccounts] = useState([]);
   const [conversionRate, setConversionRate] = useState(null);
+  const [buying, setBuying] = useState(true);
 
   useEffect(async () => {
     setAccounts(await web3.eth.getAccounts());
@@ -33,28 +34,33 @@ const SwapCard = () => {
     const tmp = soldToken;
     setSoldToken(boughtToken);
     setBoughtToken(tmp);
+    setBuying((buying) => !buying);
   };
 
   const updateAmounts = (e) => {
-    const formattedBoughtAmount = fromExponential(
-      e.target.value * conversionRate
-    );
+    const formattedBoughtAmount = buying
+      ? fromExponential(e.target.value * conversionRate)
+      : fromExponential(e.target.value / conversionRate);
 
     setSoldAmount(e.target.value);
     setBoughtAmount(formattedBoughtAmount);
   };
 
-  const swapTokens = async (e) => {
-    await faroukswap.methods
-      .buy()
-      .send({
-        from: accounts[0],
-        value: web3.utils.toWei(soldAmount, "ether"),
-      });
+  const buyTokens = async () =>
+    await faroukswap.methods.buy().send({
+      from: accounts[0],
+      value: web3.utils.toWei(soldAmount, "ether"),
+    });
+
+  const sellTokens = async () => {
+    console.log("selling tokens:", soldAmount);
+    // await faroukswap.methods.sell(soldAmount).send({
+    //   from: accounts[0],
+    // });
   };
 
   return (
-    <div className={styles.swapContainer}>
+    <Form className={styles.swapContainer}>
       <Label basic image size="large" className={styles.tokenLabel}>
         <img src={soldToken.logoPath} />
         {soldToken.name}
@@ -87,10 +93,14 @@ const SwapCard = () => {
         onChange={(e) => setBoughtAmount(e.target.value)}
       />
       <p>Conversion rate: 1 ETH = {1 * conversionRate} FRKC</p>
-      <Button primary className={styles.swapButton} onClick={swapTokens}>
+      <Button
+        primary
+        className={styles.swapButton}
+        onClick={buying ? buyTokens : sellTokens}
+      >
         Swap
       </Button>
-    </div>
+    </Form>
   );
 };
 
