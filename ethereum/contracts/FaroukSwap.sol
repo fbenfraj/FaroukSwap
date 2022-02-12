@@ -21,8 +21,11 @@ contract FaroukSwap {
         uint256 dexBalance = contractReserve.balanceOf(address(this));
         require(amountToBuy > 0, "You need to send some ether.");
         require(amountToBuy <= dexBalance, "Not enough tokens in the reserve.");
-        contractReserve.transfer(msg.sender, amountToBuy);
-        emit Bought(amountToBuy);
+        contractReserve.transfer(
+            msg.sender,
+            amountToBuy * conversionRate
+        );
+        emit Bought(amountToBuy * conversionRate);
     }
 
     function sell(uint256 amount) public {

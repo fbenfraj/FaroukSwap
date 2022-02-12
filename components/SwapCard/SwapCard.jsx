@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Icon, Input, Label } from "semantic-ui-react";
 import fromExponential from "from-exponential";
+import web3 from "../../ethereum/web3";
 import faroukswap from "../../ethereum/faroukswap";
 import styles from "./SwapCard.module.css";
 
@@ -20,9 +21,11 @@ const SwapCard = () => {
   const [soldAmount, setSoldAmount] = useState("");
   const [boughtToken, setBoughtToken] = useState(tokens["faroukcoin"]);
   const [boughtAmount, setBoughtAmount] = useState("");
+  const [accounts, setAccounts] = useState([]);
   const [conversionRate, setConversionRate] = useState(null);
 
   useEffect(async () => {
+    setAccounts(await web3.eth.getAccounts());
     setConversionRate(await faroukswap.methods.conversionRate().call());
   }, []);
 
@@ -39,6 +42,15 @@ const SwapCard = () => {
 
     setSoldAmount(e.target.value);
     setBoughtAmount(formattedBoughtAmount);
+  };
+
+  const swapTokens = async (e) => {
+    await faroukswap.methods
+      .buy()
+      .send({
+        from: accounts[0],
+        value: web3.utils.toWei(soldAmount, "ether"),
+      });
   };
 
   return (
@@ -75,7 +87,7 @@ const SwapCard = () => {
         onChange={(e) => setBoughtAmount(e.target.value)}
       />
       <p>Conversion rate: 1 ETH = {1 * conversionRate} FRKC</p>
-      <Button primary className={styles.swapButton}>
+      <Button primary className={styles.swapButton} onClick={swapTokens}>
         Swap
       </Button>
     </div>
